@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NovaTrade — Demo</title>
 <style>
+.hidden{display:none!important}
 *{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:#101421;color:#eee}
 button,input{font:inherit}button{cursor:pointer}.hidden{display:none!important}
 .top{height:66px;background:#1d1736;border-bottom:1px solid #342a50;display:flex;align-items:center;padding:0 18px;gap:18px}
@@ -31,7 +32,7 @@ button,input{font:inherit}button{cursor:pointer}.hidden{display:none!important}
 <header class="top">
 <div class="logo">N</div>
 <nav class="nav"><span class="sel" onclick="closeDash()">⌂ Trader's Hub</span><span>↓ Deposit</span><span>↑ Withdraw</span><span onclick="openDash()">◷ History</span><span>▢ Chat</span></nav>
-<div class="spacer"></div><div class="user" id="userLabel">Demo Trader⌄</div><button class="deposit" onclick="showWallet()">Deposit</button>
+<div class="spacer"></div><button class="user" id="userLabel" onclick="showLogin()">Demo Trader⌄</button><button class="deposit" onclick="showWallet()">Deposit</button>
 </header>
 
 <div class="layout">
@@ -57,7 +58,7 @@ button,input{font:inherit}button{cursor:pointer}.hidden{display:none!important}
 </aside>
 </div>
 
-<div id="login" class="panel"><div class="card"><button class="close" onclick="hideLogin()">×</button><h2>Welcome to NovaTrade</h2><p>Demo account access. No real-money trading is enabled.</p><input class="field" id="email" placeholder="Email"><input class="field" type="password" placeholder="Password"><button class="primary" onclick="login()">Sign in</button><button class="switch" onclick="alert('Demo registration: account created locally.')">Create demo account</button></div></div>
+<div id="login" class="panel hidden"><div class="card"><button class="close" onclick="hideLogin()">×</button><h2>Welcome to NovaTrade</h2><p>Demo account access. No real-money trading is enabled.</p><input class="field" id="email" placeholder="Email"><input class="field" type="password" placeholder="Password"><button class="primary" onclick="login()">Sign in</button><button class="switch" onclick="alert('Demo registration: account created locally.')">Create demo account</button></div></div>
 
 <div id="dashboard" class="dashboard hidden"><div class="dashhead"><div class="logo">N</div><div style="margin-left:14px;font-weight:800">Account Dashboard</div><div class="spacer"></div><button class="deposit" onclick="closeDash()">Back to Trade</button></div><div class="dashbody"><h1>Demo Account</h1><div class="cards"><div class="stat"><small>Balance</small><strong id="dashBalance">$0.00</strong></div><div class="stat"><small>Demo P/L</small><strong class="green">+$95.57</strong></div><div class="stat"><small>Trades</small><strong id="dashTrades">0</strong></div></div><div class="history"><table><thead><tr><th>Time</th><th>Type</th><th>Stake</th><th>Result</th></tr></thead><tbody id="history"></tbody></table></div></div></div>
 
@@ -69,10 +70,10 @@ function seed(){let p=price;for(let i=0;i<140;i++){p+=(Math.random()-.5)*7;pts.p
 function draw(){let w=c.clientWidth,h=c.clientHeight;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#202938';ctx.lineWidth=1;for(let x=0;x<w;x+=75){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=40;y<h;y+=96){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}let min=Math.min(...pts),max=Math.max(...pts),r=max-min||1;ctx.beginPath();pts.forEach((p,i)=>{let x=15+i*(w-30)/(pts.length-1),y=h-35-(p-min)/r*(h-90);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.strokeStyle='#d9dbe4';ctx.lineWidth=2;ctx.stroke();ctx.lineTo(w-15,h-35);ctx.lineTo(15,h-35);ctx.closePath();ctx.fillStyle='rgba(110,120,145,.13)';ctx.fill()}
 function tick(){price+=(Math.random()-.5)*3.8;pts.push(price);if(pts.length>160)pts.shift();document.getElementById('price').textContent=price.toFixed(2);document.getElementById('move').textContent=(price-9819.1).toFixed(2)+' ('+(Math.abs((price-9819.1)/9819.1)*100).toFixed(2)+'%) ↘';draw()}
 function setStake(v){stake=v;update()}function changeStake(v){stake=Math.max(1,Math.min(1000,stake+v));update()}function update(){let p=stake*1.95;document.getElementById('stake').textContent=stake;document.getElementById('payout').textContent='$'+p.toFixed(2)+' USD';document.getElementById('evenPay').textContent='$'+p.toFixed(2)+' USD';document.getElementById('oddPay').textContent='$'+p.toFixed(2)+' USD'}
-function trade(type){trades++;document.getElementById('openCount').textContent=1;document.getElementById('positionTitle').textContent=type+' trade opened';document.getElementById('positionText').textContent='Demo trade · $'+stake.toFixed(2)+' stake';setTimeout(()=>{let win=Math.random()>.45,pay=win?stake*.95:-stake;balance+=pay;history.unshift({time:new Date().toLocaleTimeString(),type,stake,result:pay});document.getElementById('openCount').textContent=0;document.getElementById('positionTitle').textContent=win?'Trade won':'Trade settled';document.getElementById('positionText').textContent=(win?'+$'+pay.toFixed(2):'-$'+Math.abs(pay).toFixed(2))+' demo result';document.getElementById('dashBalance').textContent='$'+balance.toFixed(2);document.getElementById('dashTrades').textContent=trades;renderHistory()},1600)}
+function trade(type){trades++; document.getElementById('dashTrades').textContent=trades;document.getElementById('openCount').textContent=1;document.getElementById('positionTitle').textContent=type+' trade opened';document.getElementById('positionText').textContent='Demo trade · $'+stake.toFixed(2)+' stake';setTimeout(()=>{let win=Math.random()>.45,pay=win?stake*.95:-stake;balance+=pay;history.unshift({time:new Date().toLocaleTimeString(),type,stake,result:pay});document.getElementById('openCount').textContent=0;document.getElementById('positionTitle').textContent=win?'Trade won':'Trade settled';document.getElementById('positionText').textContent=(win?'+$'+pay.toFixed(2):'-$'+Math.abs(pay).toFixed(2))+' demo result';document.getElementById('dashBalance').textContent='$'+balance.toFixed(2);document.getElementById('dashTrades').textContent=trades;renderHistory()},1600)}
 function renderHistory(){document.getElementById('history').innerHTML=history.map(x=>`<tr><td>${x.time}</td><td>${x.type}</td><td>$${x.stake.toFixed(2)}</td><td class="${x.result>=0?'green':'red'}">${x.result>=0?'+':''}$${x.result.toFixed(2)}</td></tr>`).join('')}
 function login(){document.getElementById('userLabel').textContent=(document.getElementById('email').value||'Demo Trader')+'⌄';hideLogin()}
-function hideLogin(){document.getElementById('login').classList.add('hidden')}function openDash(){document.getElementById('dashboard').classList.remove('hidden')}function closeDash(){document.getElementById('dashboard').classList.add('hidden')}function showWallet(){alert('Demo wallet only. Real deposits are disabled.')}
+function hideLogin(){document.getElementById('login').classList.add('hidden')} function showLogin(){document.getElementById('login').classList.remove('hidden')}function openDash(){document.getElementById('dashboard').classList.remove('hidden')}function closeDash(){document.getElementById('dashboard').classList.add('hidden')}function showWallet(){alert('Demo wallet only. Real deposits are disabled.')}
 seed();resize();draw();update();window.addEventListener('resize',()=>{resize();draw()});setInterval(tick,650);
 </script>
 </body>
