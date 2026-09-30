@@ -1,0 +1,28 @@
+{
+  "name": "congress-trading-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "Open dataset and dashboard of U.S. Congress and executive branch stock trades disclosed under the STOCK Act",
+  "scripts": {
+    "dev": "vite",
+    "build": "bun scripts/validateTickerCoverage.mjs && vite build && node scripts/prerender.mjs && node scripts/dataShell.test.mjs",
+    "preview": "vite preview",
+    "kit:sync": "for f in kit.css index.jsx; do curl -fsS https://raw.githubusercontent.com/kadoa-org/congress-trading-monitor/main/src/kit/$f -o src/kit/$f; done",
+    "test": "bun scripts/companyName.test.mjs && bun scripts/seo.test.mjs && bun scripts/validateTickerCoverage.mjs"
+  },
+  "dependencies": {
+    "govuk-frontend": "^6.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sass": "^1.101.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.0"
+  }
+}

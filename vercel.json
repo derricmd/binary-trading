@@ -1,0 +1,49 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "congress.kadoa.com"
+        }
+      ],
+      "destination": "https://www.kadoa.com/congress/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "congress.kadoa.com"
+        }
+      ],
+      "destination": "https://www.kadoa.com/congress/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/congress/((?!data/|assets/|favicon|robots|sitemap|og-image).*)",
+      "destination": "/congress/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/congress/data/:path*",
+      "has": [
+        {
+          "type": "query",
+          "key": "v"
+        }
+      ],
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
