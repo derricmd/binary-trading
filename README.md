@@ -1,14 +1,12 @@
-# Trade Dashboard Demo
+# NovaTrade Functional Demo v5
 
-Standalone static demo inspired by the supplied trading-dashboard screenshot.
+Static GitHub Pages demo. Upload all files to the same repository folder.
 
-## GitHub Pages
+Features:
+- Separate History and Chat pages
+- Demo deposits/withdrawals stored in localStorage
+- Transaction records include amount, status, date, account and DEMO mode
+- Chat appears online and sends an automatic welcome message on first open
+- Automated demo replies
 
-1. Create a new GitHub repository.
-2. Upload `index.html` to the repository root.
-3. Go to **Settings → Pages**.
-4. Under **Build and deployment**, select **Deploy from a branch**.
-5. Select `main` and `/ (root)`, then Save.
-6. GitHub will provide the Pages URL.
-
-This is a demo/simulation. It does not process real-money trades, deposits, withdrawals, or live financial transactions.
+Important: all financial actions are simulations only. No real payments, withdrawals, brokerage or financial account connections are implemented.

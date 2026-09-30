@@ -12,11 +12,11 @@
 <aside class="side">
   <div class="brand">Nova<span>Trade</span></div>
   <div class="nav">
-    <button class="active" data-page="trade">▣ &nbsp; Trader's Hub</button>
-    <button data-page="deposit">＋ &nbsp; Deposit</button>
-    <button data-page="withdraw">↗ &nbsp; Withdraw</button>
-    <button data-page="history">◷ &nbsp; History</button>
-    <button data-page="chat">◉ &nbsp; Chat</button>
+    <button class="active" onclick="location.href='index.html'">▣ &nbsp; Trader's Hub</button>
+    <button onclick="location.href='deposit.html'">＋ &nbsp; Deposit</button>
+    <button onclick="location.href='withdraw.html'">↗ &nbsp; Withdraw</button>
+    <button onclick="location.href='history.html'">◷ &nbsp; History</button>
+    <button onclick="location.href='chat.html'">◉ &nbsp; Chat</button>
   </div>
   <div class="side-bottom"><small>Account</small><div style="margin-top:5px"><b id="accountName">Demo Trader</b></div><span class="demo-badge">DEMO MODE</span></div>
 </aside>
@@ -47,27 +47,22 @@
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="modal-box"><button class="close" id="close">×</button><h3>Demo Account</h3><p class="muted">This account is stored only in your browser.</p><label class="label">Display name</label><input id="nameInput" placeholder="Demo Trader"><button class="primary" id="saveName">Save account</button></div></div>
 <script>
-const $=s=>document.querySelector(s);let balance=Number(localStorage.ntBalance||1000),trades=JSON.parse(localStorage.ntTrades||'[]'),name=localStorage.ntName||'Demo Trader',prices=[];let current=100,auto=false,autoTimer=null;
-function money(n){return '$'+n.toFixed(2)}
-function save(){localStorage.ntBalance=balance;localStorage.ntTrades=JSON.stringify(trades);localStorage.ntName=name}
-function render(){
- $('#balance').textContent=money(balance);$('#accountName').textContent=name;$('#openCount').textContent=trades.filter(t=>t.status==='OPEN').length;$('#closedCount').textContent=trades.filter(t=>t.status==='CLOSED').length;
- const closed=trades.filter(t=>t.status==='CLOSED').slice().reverse();const open=trades.filter(t=>t.status==='OPEN').slice().reverse();
- function rows(arr){return arr.length?'<div class="history-head"><div>Contract</div><div>Direction</div><div>Stake</div><div>Result</div><div>Profit</div></div>'+arr.map(t=>`<div class="row"><div>${t.contract}</div><div>${t.direction}</div><div>${money(t.stake)}</div><div class="${t.result==='WIN'?'win':t.result==='LOSS'?'loss':'muted'}">${t.result||'OPEN'}</div><div class="${t.profit>=0?'win':'loss'}">${t.result?((t.profit>=0?'+':'')+money(t.profit)): '—'}</div></div>`).join(''):'<div class="empty">Nothing here yet.</div>'}
- $('#history').innerHTML=rows(open);
-}
-function toast(x){const e=$('#toast');e.textContent=x;e.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>e.style.display='none',2300)}
+const KEY='ntV5';
+const state=JSON.parse(localStorage.getItem(KEY)||'null')||{balance:1000,name:'Demo Trader',trades:[],transactions:[],chat:[]};
+let balance=state.balance,trades=state.trades,name=state.name,prices=[],current=100,auto=false,autoTimer=null;
+const $=s=>document.querySelector(s),money=n=>'$'+Number(n).toFixed(2);
+function sync(){state.balance=balance;state.trades=trades;state.name=name;localStorage.setItem(KEY,JSON.stringify(state))}
+function toast(x){const e=$('#toast');e.textContent=x;e.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>e.style.display='none',2400)}
+function render(){ $('#balance').textContent=money(balance);$('#accountName').textContent=name;$('#openCount').textContent=trades.filter(t=>t.status==='OPEN').length;$('#closedCount').textContent=trades.filter(t=>t.status==='CLOSED').length; const closed=trades.filter(t=>t.status==='CLOSED').slice().reverse(),open=trades.filter(t=>t.status==='OPEN').slice().reverse(); function rows(arr){return arr.length?'<div class="history-head"><div>Contract</div><div>Direction</div><div>Stake</div><div>Result</div><div>Profit</div></div>'+arr.map(t=>`<div class="row"><div>${t.contract}</div><div>${t.direction}</div><div>${money(t.stake)}</div><div class="${t.result==='WIN'?'win':t.result==='LOSS'?'loss':'muted'}">${t.result||'OPEN'}</div><div class="${t.profit>=0?'win':'loss'}">${t.result?(t.profit>=0?'+':'')+money(t.profit):'—'}</div></div>`).join(''):'<div class="empty">Nothing here yet.</div>'} $('#history').innerHTML=rows(open)}
 function updateStake(){let s=Math.max(1,Number($('#stake').value)||1);$('#stake').value=s;$('#payout').textContent=money(s*1.9);$('#profit').textContent='+'+money(s*.9)}
-function draw(){let w=1000,h=380,min=Math.min(...prices),max=Math.max(...prices);if(!prices.length)return;let pts=prices.map((v,i)=>{let x=i*(w/(prices.length-1||1)),y=h-25-(v-min)/(max-min||1)*(h-50);return [x,y]});let d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');$('#line').setAttribute('d',d);$('#area').setAttribute('d',d+' L '+w+' '+h+' L 0 '+h+' Z')}
+function draw(){let w=1000,h=380,min=Math.min(...prices),max=Math.max(...prices);if(!prices.length)return;let pts=prices.map((v,i)=>[i*(w/(prices.length-1||1)),h-25-(v-min)/(max-min||1)*(h-50)]);let d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');$('#line').setAttribute('d',d);$('#area').setAttribute('d',d+' L '+w+' '+h+' L 0 '+h+' Z')}
 function tick(){current+=((Math.random()-.49)*1.5);current=Math.max(92,Math.min(108,current));prices.push(current);if(prices.length>70)prices.shift();$('#price').textContent=current.toFixed(2);draw()}
-function place(direction){let stake=Math.max(1,Number($('#stake').value)||1);if(stake>balance){toast('Insufficient demo balance');return}let t={id:Date.now(),contract:$('#contract').value,direction,stake,result:null,profit:0,status:'OPEN'};balance-=stake;trades.push(t);save();render();toast('Trade opened · waiting for simulated result');setTimeout(()=>settle(t.id),1800)}
-function settle(id){let t=trades.find(x=>x.id===id);if(!t)return;let win=Math.random()>.48;t.result=win?'WIN':'LOSS';t.status='CLOSED';t.profit=win?t.stake*.9:-t.stake;if(win)balance+=t.stake*1.9;save();render();toast(win?'Demo trade won +90%':'Demo trade lost')}
+function place(direction){let stake=Math.max(1,Number($('#stake').value)||1);if(stake>balance)return toast('Insufficient demo balance');let t={id:Date.now(),contract:$('#contract').value,direction,stake,result:null,profit:0,status:'OPEN',time:new Date().toLocaleString()};balance-=stake;trades.push(t);sync();render();toast('Demo trade opened');setTimeout(()=>settle(t.id),1800)}
+function settle(id){let t=trades.find(x=>x.id===id);if(!t)return;let win=Math.random()>.48;t.result=win?'WIN':'LOSS';t.status='CLOSED';t.profit=win?t.stake*.9:-t.stake;if(win)balance+=t.stake*1.9;sync();render();toast(win?'Demo trade won +90%':'Demo trade lost')}
 $('#minus').onclick=()=>{$('#stake').value=Math.max(1,(Number($('#stake').value)||1)-1);updateStake()};$('#plus').onclick=()=>{$('#stake').value=(Number($('#stake').value)||1)+1;updateStake()};$('#stake').oninput=updateStake;document.querySelectorAll('[data-stake]').forEach(b=>b.onclick=()=>{$('#stake').value=b.dataset.stake;document.querySelectorAll('[data-stake]').forEach(x=>x.classList.remove('active'));b.classList.add('active');updateStake()});$('#even').onclick=()=>place('EVEN');$('#odd').onclick=()=>place('ODD');
 $('#switch').onclick=()=>{auto=!auto;$('#switch').classList.toggle('on',auto);if(auto){toast('Auto-trade enabled');autoTimer=setInterval(()=>place(Math.random()>.5?'EVEN':'ODD'),4500)}else{clearInterval(autoTimer);toast('Auto-trade disabled')}};
 $('#manualTab').onclick=()=>{$('#manualTab').classList.add('active');$('#autoTab').classList.remove('active')};$('#autoTab').onclick=()=>{$('#autoTab').classList.add('active');$('#manualTab').classList.remove('active');toast('Use the switch below to start auto-trade')};
-$('#openTab').onclick=()=>{$('#openTab').classList.add('active');$('#closedTab').classList.remove('active');const old=trades.filter(t=>t.status==='OPEN').slice().reverse();$('#history').innerHTML=old.length?'<div class="history-head"><div>Contract</div><div>Direction</div><div>Stake</div><div>Result</div><div>Profit</div></div>'+old.map(t=>`<div class="row"><div>${t.contract}</div><div>${t.direction}</div><div>${money(t.stake)}</div><div class="muted">OPEN</div><div>—</div></div>`).join(''):'<div class="empty">No open trades.</div>'};
-$('#closedTab').onclick=()=>{$('#closedTab').classList.add('active');$('#openTab').classList.remove('active');const old=trades.filter(t=>t.status==='CLOSED').slice().reverse();$('#history').innerHTML=old.length?'<div class="history-head"><div>Contract</div><div>Direction</div><div>Stake</div><div>Result</div><div>Profit</div></div>'+old.map(t=>`<div class="row"><div>${t.contract}</div><div>${t.direction}</div><div>${money(t.stake)}</div><div class="${t.result==='WIN'?'win':'loss'}">${t.result}</div><div class="${t.profit>=0?'win':'loss'}">${t.profit>=0?'+':''}${money(t.profit)}</div></div>`).join(''):'<div class="empty">No closed trades.</div>'};
-$('#accountBtn').onclick=()=>{$('#nameInput').value=name;$('#modal').style.display='flex'};$('#close').onclick=()=>$('#modal').style.display='none';$('#saveName').onclick=()=>{name=$('#nameInput').value.trim()||'Demo Trader';save();render();$('#modal').style.display='none';toast('Account updated')};
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');let p=b.dataset.page;if(p!=='trade')toast(p==='deposit'?'Demo deposit screen: use the practice balance only.':p==='withdraw'?'Demo withdrawals are simulated only.':p==='history'?'Use the Open / Closed tabs below.':'Chat is a demo placeholder.')});
+$('#openTab').onclick=()=>{render();$('#openTab').classList.add('active');$('#closedTab').classList.remove('active')};$('#closedTab').onclick=()=>{$('#closedTab').classList.add('active');$('#openTab').classList.remove('active');const old=trades.filter(t=>t.status==='CLOSED').slice().reverse();$('#history').innerHTML=old.length?'<div class="history-head"><div>Contract</div><div>Direction</div><div>Stake</div><div>Result</div><div>Profit</div></div>'+old.map(t=>`<div class="row"><div>${t.contract}</div><div>${t.direction}</div><div>${money(t.stake)}</div><div class="${t.result==='WIN'?'win':'loss'}">${t.result}</div><div class="${t.profit>=0?'win':'loss'}">${t.profit>=0?'+':''}${money(t.profit)}</div></div>`).join(''):'<div class="empty">No closed trades.</div>'};
+$('#accountBtn').onclick=()=>{name=prompt('Demo account display name:',name)||name;sync();render();toast('Demo account updated')};
 for(let i=0;i<70;i++)prices.push(100+(Math.random()-.5)*5);draw();setInterval(tick,900);updateStake();render();
 </script></body></html>
